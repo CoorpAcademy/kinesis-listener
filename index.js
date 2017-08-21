@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
+const _ = require('lodash');
 
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
@@ -9,5 +10,9 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 const kinesisStream = 'bricklane-central-development'
 
 kinesis.describeStreamP({StreamName: kinesisStream})
-    .then(streamConf =>
-        console.log(streamConf))
+    .then(streamConf => {
+            const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
+            console.log('stream', kinesisStream, 'a', shardsId.length, 'shards:', shardsId);
+            return shardsId;
+        }
+    )
