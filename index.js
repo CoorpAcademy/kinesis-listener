@@ -8,15 +8,18 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 }), {suffix: 'P'});
 
 const kinesisStream = 'bricklane-central-development'
-const batchSize = 4;
+const batchSize = 4; // maybe: slow mode option
 
 const readIterator = recordProcessor => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
             const iterator = data.NextShardIterator;
             // TODO: see MillisBehind Latest
-                const records = _.map(data.Records, record => record.Data);
-                console.log(records)
+                const records = _.map(data.Records, record => {
+                    const payload = new Buffer(record.Data, 'base64').toString('utf-8');
+                    return JSON.parse(payload);
+                    // TODO: json parsing option
+                });
                 _.map(records, recordProcessor);
             // NEXT
             // iterate.
