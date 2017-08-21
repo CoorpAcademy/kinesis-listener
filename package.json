@@ -14,6 +14,7 @@
   "author": "Adrien Becchis",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.100.0"
+    "aws-sdk": "^2.100.0",
+    "bluebird": "^3.5.0"
   }
 }

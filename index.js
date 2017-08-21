@@ -1,13 +1,13 @@
 const AWS = require('aws-sdk');
+const Promise = require('bluebird');
 
-const kinesis = new AWS.Kinesis({apiVersion: '2013-12-02'});
+const kinesis = Promise.promisifyAll(new AWS.Kinesis({
+    apiVersion: '2013-12-02',
+    region: process.env.AWS_REGION || 'eu-west-1'
+}), {suffix: 'P'});
 
-const params = {
-  // ShardId: 'STRING_VALUE', /* required */
-  ShardIteratorType: 'LATEST',
-  StreamName: 'bricklane-central-development'
-};
-kinesis.getShardIterator(params, function(err, data) {
-  if (err) console.log(err, err.stack); // an error occurred
-  else     console.log(data);           // successful response
-});
+const kinesisStream = 'bricklane-central-development'
+
+kinesis.describeStreamP({StreamName: kinesisStream})
+    .then(streamConf =>
+        console.log(streamConf))
