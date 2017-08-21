@@ -8,11 +8,22 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 }), {suffix: 'P'});
 
 const kinesisStream = 'bricklane-central-development'
+const batchSize = 4;
+
+//const read
+
 
 kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
             const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
             console.log('stream', kinesisStream, 'a', shardsId.length, 'shards:', shardsId);
             return shardsId;
-        }
-    )
+        })
+    .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
+        ShardId: shardId, // TODO: type later configurble
+        ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
+    .then( shardIterators => {
+// For now only consider the first shard
+    console.log(shardIterators)
+    })
+// TODO: later count
