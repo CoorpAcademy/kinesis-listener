@@ -12,5 +12,8 @@
     "aws"
   ],
   "author": "Adrien Becchis",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.100.0"
+  }
 }
