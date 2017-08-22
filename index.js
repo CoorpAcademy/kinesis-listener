@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const _ = require('lodash');
+const ora = require('ora');
 const argv = require('yargs').argv
 
 const processors = require('./processors');
@@ -40,13 +41,14 @@ kinesis.describeStreamP({StreamName: kinesisStream})
         ShardId: shardId, // TODO: type later configurble
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        const kinesisIterator = readIterator(processors.counterProcessor()); //TODO conf
+        const spinner = ora('Entering listening mode:').start();
+        const updateSpinner = count => { spinner.text = `${count} records received so far`};
+        const kinesisIterator = readIterator(processors.counterProcessor(updateSpinner)); //TODO conf
         const  readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
                 .then(readLoop)
         }
-        console.log('Entering listening mode:')
         return readLoop(shardIterators);
 
 

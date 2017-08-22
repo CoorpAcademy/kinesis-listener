@@ -1,12 +1,13 @@
 
 
-const counterProcessor = () => {
+const counterProcessor = (updateCount = console.log) => {
     let count = 0;
     return record => {
         count++;
-        console.log(`${count} records so far`);
+        updateCount(count);
     }
 }
+
 
 
 module.exports.counterProcessor = counterProcessor;
