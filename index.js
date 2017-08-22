@@ -7,24 +7,23 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     region: process.env.AWS_REGION || 'eu-west-1'
 }), {suffix: 'P'});
 
-const kinesisStream = 'bricklane-central-development'
+const kinesisStream = 'bricklane-central-development';
 const batchSize = 4; // maybe: slow mode option
 
 const readIterator = recordProcessor => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
             const iterator = data.NextShardIterator;
-            // TODO: see MillisBehind Latest
+            console.log('DAT', data, 'DAT')
+            // TODO: see MillisBehind Latest to determine batchsize
                 const records = _.map(data.Records, record => {
                     const payload = new Buffer(record.Data, 'base64').toString('utf-8');
                     return JSON.parse(payload);
                     // TODO: json parsing option
                 });
-                _.map(records, recordProcessor);
+               _.map(records, recordProcessor);
             // NEXT
-            // iterate.
-             return Promise.delay(0.1)
-                 .then(() => readIterator(recordProcessor)(iterator))
+             return iterator;
             })
 }
 
@@ -38,9 +37,15 @@ kinesis.describeStreamP({StreamName: kinesisStream})
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
         ShardId: shardId, // TODO: type later configurble
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
-    .then( shardIterators => {
-// For now only consider the first shard
-    console.log(shardIterators)
-        readIterator(console.log)(shardIterators[0])
+    .then(shardIterators => {
+        const kinesisIterator = readIterator(console.log); //TODO conf
+        const  readLoop = (initialIterators) => {
+            // TODO graceful STOP
+            return Promise.map(initialIterators, kinesisIterator)
+                .then(readLoop)
+        }
+        return readLoop(shardIterators);
+
+
     })
 // TODO: later count
