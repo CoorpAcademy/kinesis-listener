@@ -1,5 +1,6 @@
-const logUpdate = require('log-update');
+const c = require('chalk');
 const _ = require('lodash');
+const logUpdate = require('log-update');
 const util = require('util');
 
 const counterProcessor = (updateCount = console.log) => {
@@ -16,7 +17,7 @@ const lastItemAndCountProcessor = () => {
     let count = 0;
     return record => {
         count++;
-        logUpdate(`${count} records received so far, last record:
+        logUpdate(`${c.bold(`${c.cyan(count)} records`)} received so far, last record:
 ${util.inspect(_.omit(record, ['content']), {depth: null, colors: true})}
 `
         );

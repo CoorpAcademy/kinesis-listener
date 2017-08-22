@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
+const c = require('chalk');
 const _ = require('lodash');
 const ora = require('ora');
 const argv = require('yargs').argv
@@ -33,7 +34,8 @@ const readIterator = recordProcessor => ShardIterator => {
 kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
             const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
-            console.log('stream', kinesisStream, 'has', shardsId.length, 'shards:', shardsId);
+            console.log('stream', c.blue.bold.underline(kinesisStream), 'has',
+                        c.blue.bold(shardsId.length), 'shards:', shardsId);
             return shardsId;
         })
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
@@ -42,7 +44,7 @@ kinesis.describeStreamP({StreamName: kinesisStream})
     .then(shardIterators => {
         // const spinner = ora('Entering listening mode:').start();
         // const updateSpinner = count => { spinner.text = `${count} records received so far`};
-        console.log('Entering listening mode')
+        console.log(c.red.bold('Entering listening mode'))
         const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO configurable
         // maybe list of processors?
         const  readLoop = (initialIterators) => {
