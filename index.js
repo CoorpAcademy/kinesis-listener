@@ -34,7 +34,7 @@ const readIterator = recordProcessor => ShardIterator => {
 kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
             const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
-            console.log('stream', kinesisStream, 'a', shardsId.length, 'shards:', shardsId);
+            console.log('stream', kinesisStream, 'has', shardsId.length, 'shards:', shardsId);
             return shardsId;
         })
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
