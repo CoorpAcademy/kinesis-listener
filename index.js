@@ -41,9 +41,10 @@ kinesis.describeStreamP({StreamName: kinesisStream})
         ShardId: shardId, // TODO: type later configurble
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        const spinner = ora('Entering listening mode:').start();
-        const updateSpinner = count => { spinner.text = `${count} records received so far`};
-        const kinesisIterator = readIterator(processors.counterProcessor(updateSpinner)); //TODO conf
+        // const spinner = ora('Entering listening mode:').start();
+        // const updateSpinner = count => { spinner.text = `${count} records received so far`};
+        console.log('Entering listening mode')
+        const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO conf
         const  readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
