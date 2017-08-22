@@ -24,8 +24,7 @@ const readIterator = recordProcessor => ShardIterator => {
                     return JSON.parse(payload);
                     // TODO: json parsing option
                 });
-               _.map(records, recordProcessor);
-            // NEXT
+               _.map(records, recordProcessor); // maybe: later async
              return iterator;
             })
 }
@@ -38,13 +37,14 @@ kinesis.describeStreamP({StreamName: kinesisStream})
             return shardsId;
         })
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
-        ShardId: shardId, // TODO: type later configurble
+        ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
         // const spinner = ora('Entering listening mode:').start();
         // const updateSpinner = count => { spinner.text = `${count} records received so far`};
         console.log('Entering listening mode')
-        const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO conf
+        const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO configurable
+        // maybe list of processors?
         const  readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
@@ -58,4 +58,3 @@ kinesis.describeStreamP({StreamName: kinesisStream})
         console.log(err.message);
         process.exit(2);
     })
-// TODO: later count
