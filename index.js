@@ -3,6 +3,8 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 const argv = require('yargs').argv
 
+const processors = require('./processors');
+
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
     region: process.env.AWS_REGION || 'eu-west-1'
@@ -38,12 +40,13 @@ kinesis.describeStreamP({StreamName: kinesisStream})
         ShardId: shardId, // TODO: type later configurble
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        const kinesisIterator = readIterator(console.log); //TODO conf
+        const kinesisIterator = readIterator(processors.counterProcessor()); //TODO conf
         const  readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
                 .then(readLoop)
         }
+        console.log('Entering listening mode:')
         return readLoop(shardIterators);
 
 
