@@ -1,13 +1,14 @@
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const _ = require('lodash');
+const argv = require('yargs').argv
 
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
     region: process.env.AWS_REGION || 'eu-west-1'
 }), {suffix: 'P'});
 
-const kinesisStream = 'bricklane-central-development';
+const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = 4; // maybe: slow mode option
 
 const readIterator = recordProcessor => ShardIterator => {
@@ -47,5 +48,9 @@ kinesis.describeStreamP({StreamName: kinesisStream})
         return readLoop(shardIterators);
 
 
+    })
+    .catch(err => err.name ===  "ResourceNotFoundException", err => {
+        console.log(err.message);
+        process.exit(2);
     })
 // TODO: later count
