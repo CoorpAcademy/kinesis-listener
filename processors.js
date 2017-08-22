@@ -17,7 +17,7 @@ const lastItemAndCountProcessor = () => {
     let count = 0;
     return record => {
         count++;
-        logUpdate(`${c.bold(`${c.cyan(count)} records`)} received so far, last record:
+        logUpdate(`${c.bold(`${c.red('►')} ${c.cyan(count)} records`)} received so far, last record:
 ${util.inspect(_.omit(record, ['content']), {depth: null, colors: true})}
 `
         );

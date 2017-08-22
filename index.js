@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
+const logUpdate = require('log-update');
 const ora = require('ora');
 const argv = require('yargs').argv
 
@@ -13,7 +14,7 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 }), {suffix: 'P'});
 
 const kinesisStream = argv._[0] || 'bricklane-central-development';
-const batchSize = argv.batchSize || 12; // maybe: slow mode option
+const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
 const readIterator = recordProcessor => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
@@ -44,7 +45,7 @@ kinesis.describeStreamP({StreamName: kinesisStream})
     .then(shardIterators => {
         // const spinner = ora('Entering listening mode:').start();
         // const updateSpinner = count => { spinner.text = `${count} records received so far`};
-        console.log(c.red.bold('Entering listening mode'))
+        logUpdate(c.red.bold('► Entering listening mode'))
         const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO configurable
         // maybe list of processors?
         const  readLoop = (initialIterators) => {
