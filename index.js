@@ -1,3 +1,4 @@
+#!/usr/bin/env
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
