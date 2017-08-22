@@ -1,13 +1,13 @@
 {
   "name": "@coorpacademy/kinesis-listener",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Cli to listen to a kinesis stream",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-     "kinesis-listener": "node index.js"
+    "kinesis-listener": "./index.js"
   },
   "keywords": [
     "cli",
