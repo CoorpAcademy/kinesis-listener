@@ -10,7 +10,6 @@ c.bold(`${c.red('►')} Listening ${c.blue.underline(state.kinesisStream)} kines
   - received so far ${c.blue.bold(state.count || 0)} records
 ${!state.count ? '':
 `  - last received record (at ${c.dim.grey(state.timestampLastReceived)}) :
-${util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true})}`
-                    }`; // TODO: handle pading
+${indentString(util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true}), 4)}`}`;
 
 module.exports = view
