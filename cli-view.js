@@ -1,4 +1,7 @@
+const _ = require('lodash');
 const c = require('chalk');
+const indentString = require('indent-string');
+const util = require('util');
 
 const view = state =>
 `${

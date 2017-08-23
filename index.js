@@ -4,8 +4,6 @@ const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
 const logUpdate = require('log-update');
-const ora = require('ora');
-const util = require('util');
 const argv = require('yargs').argv
 
 const processors = require('./processors');
