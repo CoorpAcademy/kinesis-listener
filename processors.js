@@ -1,26 +1,18 @@
-const counterProcessor = (state) => {
-    let count = 0;
-    return record => {
-        count++;
-        state.count = count;
-    }
+const counterProcessor = state => record => {
+    state.count = (state.count || 0) + 1;
 }
 
 // const simpleLogProcessor
 
-const lastRecordProcessor = (state) => {
-    return record => {
-        state.lastRecord = record;
-    }
+const lastRecordProcessor = state => record => {
+    state.lastRecord = record;
 }
 
-const lastJsonRecordProcessor = (state) => {
-    return record => {
-        try {
-            state.lastJsonRecord = JSON.parse(record);
-        } catch(err) {
-            state.lastJsonRecord = undefined;
-        }
+const lastJsonRecordProcessor = state => record => {
+    try {
+        state.lastJsonRecord = JSON.parse(record);
+    } catch (err) {
+        state.lastJsonRecord = undefined;
     }
 }
 
