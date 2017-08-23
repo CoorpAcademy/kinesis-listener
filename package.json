@@ -1,6 +1,6 @@
 {
   "name": "@coorpacademy/kinesis-listener",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Cli to listen to a kinesis stream",
   "main": "index.js",
   "scripts": {

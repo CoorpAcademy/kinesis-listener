@@ -64,7 +64,7 @@ getStreamShards(kinesisStream)
 ${c.bold(`${c.red('►')} Listening ${c.blue.underline(STATE.kinesisStream)} kinesis stream `)}                
   - received so far ${c.blue.bold(STATE.count || 0)} records
 ${!STATE.count ? '':
-`  - last received record:
+`  - last received record (at ${c.dim.grey(STATE.timestampLastReceived)}) :
 ${util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true})}`
                     }` // TODO: handle pading
                 // TODO: maybe extract in view:

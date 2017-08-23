@@ -2,8 +2,6 @@ const counterProcessor = state => record => {
     state.count = (state.count || 0) + 1;
 }
 
-// const simpleLogProcessor
-
 const lastRecordProcessor = state => record => {
     state.lastRecord = record;
 }
@@ -16,7 +14,11 @@ const lastJsonRecordProcessor = state => record => {
     }
 }
 
+const timestampProcessor = state = state => record => {
+    state.timestampLastReceived = new Date();
+}
 module.exports.counterProcessor = counterProcessor;
 module.exports.lastRecordProcessor = lastRecordProcessor;
 module.exports.lastJsonRecordProcessor = lastJsonRecordProcessor;
-module.exports.ALL = [counterProcessor, lastRecordProcessor, lastJsonRecordProcessor]
+module.exports.timestampProcessor = timestampProcessor;
+module.exports.ALL = [counterProcessor, lastRecordProcessor, lastJsonRecordProcessor, timestampProcessor]
