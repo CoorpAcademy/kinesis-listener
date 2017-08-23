@@ -32,14 +32,15 @@ const readIterator = recordProcessor => ShardIterator => {
             })
 }
 
-
-kinesis.describeStreamP({StreamName: kinesisStream})
+const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
             const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
             console.log('stream', c.blue.bold.underline(kinesisStream), 'has',
                         c.blue.bold(shardsId.length), 'shards:', shardsId);
             return shardsId;
         })
+
+getStreamShards(kinesisStream)
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
