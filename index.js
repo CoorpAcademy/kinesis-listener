@@ -36,7 +36,7 @@ const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: 
     .then(streamConf => {
             const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
             console.log('stream', c.blue.bold.underline(kinesisStream), 'has',
-                        c.blue.bold(shardsId.length), 'shards:', shardsId);
+                        c.blue.bold(shardsId.length), 'shards:', shardsId.join(', '));
             return shardsId;
         })
 
