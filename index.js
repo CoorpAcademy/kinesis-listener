@@ -62,9 +62,14 @@ getStreamShards(kinesisStream)
             return Promise.delay(updateRate).then(printLoop);
         }
 
-        return Promise.all(readLoop(shardIterators), printLoop());
+        return Promise.all([readLoop(shardIterators), printLoop()]);
     })
     .catch(err => err.name ===  "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
+    })
+    .catch(err => {
+        console.log(c.red('Error Occured forcing us to shut down the program:'));
+        console.log(err.message);
+        process.exit(1);
     })
