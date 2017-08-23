@@ -9,6 +9,7 @@ const util = require('util');
 const argv = require('yargs').argv
 
 const processors = require('./processors');
+const cliView = require('./cli-view');
 
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
@@ -57,18 +58,8 @@ getStreamShards(kinesisStream)
                 .then(readLoop)
         }
         const printLoop = () => {
-            logUpdate(
-                `${
-c.bold(`${c.red('►')} Listening ${c.blue.underline(STATE.kinesisStream)} kinesis`)}
-  - stream with ${c.blue.bold(STATE.shardsIds.length) } shards: ${c.dim.grey(STATE.shardsIds.join(', '))}
-  - received so far ${c.blue.bold(STATE.count || 0)} records
-${!STATE.count ? '':
-`  - last received record (at ${c.dim.grey(STATE.timestampLastReceived)}) :
-${util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true})}`
-                    }` // TODO: handle pading
-                // TODO: maybe extract in view:
-            )
-            return Promise.delay(updateRate).then(printLoop)
+            logUpdate(cliView(STATE));
+            return Promise.delay(updateRate).then(printLoop);
         }
 
         return Promise.all(readLoop(shardIterators), printLoop());
