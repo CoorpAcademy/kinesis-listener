@@ -40,7 +40,7 @@ const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: 
             return shardsIds;
         })
 
-getStreamShards(kinesisStream)
+const launchListener = () => getStreamShards(kinesisStream)
     .map(shardId => kinesis.getShardIteratorP({StreamName: kinesisStream,
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
@@ -58,6 +58,9 @@ getStreamShards(kinesisStream)
 
         return Promise.all([readLoop(shardIterators), printLoop()]);
     })
+
+
+launchListener()
     .catch(err => err.name ===  "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
