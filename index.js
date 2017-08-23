@@ -17,6 +17,9 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
+const STATE = {kinesisStream, batchSize}
+const updateRate = 30;
+
 const readIterator = recordProcessor => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
@@ -34,10 +37,11 @@ const readIterator = recordProcessor => ShardIterator => {
 
 const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
-            const shardsId = _.map(streamConf.StreamDescription.Shards, 'ShardId')
+            const shardsIds = _.map(streamConf.StreamDescription.Shards, 'ShardId')
             console.log('stream', c.blue.bold.underline(kinesisStream), 'has',
-                        c.blue.bold(shardsId.length), 'shards:', shardsId.join(', '));
-            return shardsId;
+                        c.blue.bold(shardsIds.length), 'shards:', shardsIds.join(', '));
+            STATE.shardsId = shardsIds
+            return shardsIds;
         })
 
 getStreamShards(kinesisStream)
@@ -45,19 +49,19 @@ getStreamShards(kinesisStream)
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        // const spinner = ora('Entering listening mode:').start();
-        // const updateSpinner = count => { spinner.text = `${count} records received so far`};
         logUpdate(c.red.bold('► Entering listening mode'))
         const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO configurable
         // maybe list of processors?
-        const  readLoop = (initialIterators) => {
+        const readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
                 .then(readLoop)
         }
-        return readLoop(shardIterators);
-
-
+        const printLoop = () => {
+            logUpdate(c.red.bold('► Entering listening mode'))
+            return Promise.delay(updateRate).then(printLoop)
+        }
+        return Promise.all(readLoop(shardIterators), printLoop());
     })
     .catch(err => err.name ===  "ResourceNotFoundException", err => {
         console.log(err.message);
