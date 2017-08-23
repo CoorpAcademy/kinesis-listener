@@ -26,14 +26,11 @@ const readIterator = recordProcessors => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
             const iterator = data.NextShardIterator;
-            // TODO: see MillisBehind Latest to determine batchsize
-                const records = _.map(data.Records, record => {
-                    const payload = new Buffer(record.Data, 'base64').toString('utf-8');
-                    return payload;
-                    // TODO: json parsing option
-                });
+            // TODO: see MillisBehind Latest to determine batchsize?
+                const records = _.map(data.Records, record => new Buffer(record.Data, 'base64').toString('utf-8'));
                _.map(recordProcessors,
-                   recordProcessor => _.map(records, recordProcessor(STATE))); // maybe: later async
+                   recordProcessor => _.map(records, recordProcessor(STATE)));
+               // maybe: later async record processor
              return iterator;
             })
 }
@@ -50,7 +47,6 @@ getStreamShards(kinesisStream)
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        logUpdate(c.red.bold('► Entering listening mode'));
         const kinesisIterator = readIterator(processors.ALL); //TODO configurable
         const readLoop = (initialIterators) => {
             // TODO graceful STOP
