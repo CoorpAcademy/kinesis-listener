@@ -20,17 +20,18 @@ const batchSize = argv.batchSize || 22; // maybe: slow mode option
 const STATE = {kinesisStream, batchSize}
 const updateRate = 30;
 
-const readIterator = recordProcessor => ShardIterator => {
+const readIterator = recordProcessors => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
             const iterator = data.NextShardIterator;
             // TODO: see MillisBehind Latest to determine batchsize
                 const records = _.map(data.Records, record => {
                     const payload = new Buffer(record.Data, 'base64').toString('utf-8');
-                    return JSON.parse(payload);
+                    return payload;
                     // TODO: json parsing option
                 });
-               _.map(records, recordProcessor); // maybe: later async
+               _.map(recordProcessors,
+                   recordProcessor => _.map(records, recordProcessor(STATE))); // maybe: later async
              return iterator;
             })
 }
@@ -50,15 +51,14 @@ getStreamShards(kinesisStream)
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
         logUpdate(c.red.bold('► Entering listening mode'))
-        const kinesisIterator = readIterator(processors.lastItemAndCountProcessor()); //TODO configurable
-        // maybe list of processors?
+        const kinesisIterator = readIterator(processors.ALL); //TODO configurable
         const readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
                 .then(readLoop)
         }
         const printLoop = () => {
-            logUpdate(c.red.bold('► Entering listening mode'))
+            logUpdate(c.red.bold('STATE: '), JSON.stringify(STATE))
             return Promise.delay(updateRate).then(printLoop)
         }
         return Promise.all(readLoop(shardIterators), printLoop());

@@ -3,27 +3,33 @@ const _ = require('lodash');
 const logUpdate = require('log-update');
 const util = require('util');
 
-const counterProcessor = (updateCount = console.log) => {
+const counterProcessor = (state) => {
     let count = 0;
     return record => {
         count++;
-        updateCount(count);
+        state.count = count;
     }
 }
 
 // const simpleLogProcessor
 
-const lastItemAndCountProcessor = () => {
-    let count = 0;
+const lastRecordProcessor = (state) => {
     return record => {
-        count++;
-        logUpdate(`${c.bold(`${c.red('►')} ${c.cyan(count)} records`)} received so far, last record:
-${util.inspect(_.omit(record, ['content']), {depth: null, colors: true})}
-`
-        );
+        state.lastRecord = record;
     }
+}
 
+const lastJsonRecordProcessor = (state) => {
+    return record => {
+        try {
+            state.lastJsonRecord = JSON.parse(record);
+        } catch(err) {
+            state.lastJsonRecord = undefined;
+        }
+    }
 }
 
 module.exports.counterProcessor = counterProcessor;
-module.exports.lastItemAndCountProcessor = lastItemAndCountProcessor;
+module.exports.lastRecordProcessor = lastRecordProcessor;
+module.exports.lastJsonRecordProcessor = lastJsonRecordProcessor;
+module.exports.ALL = [counterProcessor, lastRecordProcessor, lastJsonRecordProcessor]
