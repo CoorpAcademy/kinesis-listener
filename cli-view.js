@@ -9,7 +9,8 @@ const speedSpinner = cliSpinners.arrow3;
 
 const view = state =>
 `${
-c.bold(`${c.red('►')} Listening ${c.blue.underline(state.kinesisStream)} kinesis`)}
+c.bold(`${c.red(timeSpinner.frames[Math.floor(new Date().getTime() / timeSpinner.interval) % timeSpinner.frames.length])
+} Listening ${c.blue.underline(state.kinesisStream)} kinesis`)}
   - stream with ${c.blue.bold(state.shardsIds.length) } shards: ${c.dim.grey(state.shardsIds.join(', '))}
   - received so far ${c.blue.bold(state.count || 0)} records
 ${!state.count ? '':
