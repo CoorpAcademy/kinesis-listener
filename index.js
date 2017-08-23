@@ -39,10 +39,8 @@ const readIterator = recordProcessors => ShardIterator => {
 
 const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
-            const shardsIds = _.map(streamConf.StreamDescription.Shards, 'ShardId')
-            console.log('stream', c.blue.bold.underline(kinesisStream), 'has',
-                        c.blue.bold(shardsIds.length), 'shards:', shardsIds.join(', '));
-            STATE.shardsId = shardsIds
+            const shardsIds = _.map(streamConf.StreamDescription.Shards, 'ShardId');
+            STATE.shardsIds = shardsIds;
             return shardsIds;
         })
 
@@ -51,7 +49,7 @@ getStreamShards(kinesisStream)
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        logUpdate(c.red.bold('► Entering listening mode'))
+        logUpdate(c.red.bold('► Entering listening mode'));
         const kinesisIterator = readIterator(processors.ALL); //TODO configurable
         const readLoop = (initialIterators) => {
             // TODO graceful STOP
@@ -60,8 +58,9 @@ getStreamShards(kinesisStream)
         }
         const printLoop = () => {
             logUpdate(
-                `
-${c.bold(`${c.red('►')} Listening ${c.blue.underline(STATE.kinesisStream)} kinesis stream `)}                
+                `${
+c.bold(`${c.red('►')} Listening ${c.blue.underline(STATE.kinesisStream)} kinesis`)}
+  - stream with ${c.blue.bold(STATE.shardsIds.length) } shards: ${c.dim.grey(STATE.shardsIds.join(', '))}
   - received so far ${c.blue.bold(STATE.count || 0)} records
 ${!STATE.count ? '':
 `  - last received record (at ${c.dim.grey(STATE.timestampLastReceived)}) :
