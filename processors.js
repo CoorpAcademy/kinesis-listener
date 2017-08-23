@@ -1,8 +1,3 @@
-const c = require('chalk');
-const _ = require('lodash');
-const logUpdate = require('log-update');
-const util = require('util');
-
 const counterProcessor = (state) => {
     let count = 0;
     return record => {

@@ -5,6 +5,7 @@ const c = require('chalk');
 const _ = require('lodash');
 const logUpdate = require('log-update');
 const ora = require('ora');
+const util = require('util');
 const argv = require('yargs').argv
 
 const processors = require('./processors');
@@ -18,7 +19,7 @@ const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
 const STATE = {kinesisStream, batchSize}
-const updateRate = 30;
+const updateRate = 1000 / 30;
 
 const readIterator = recordProcessors => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
@@ -58,9 +59,19 @@ getStreamShards(kinesisStream)
                 .then(readLoop)
         }
         const printLoop = () => {
-            logUpdate(c.red.bold('STATE: '), JSON.stringify(STATE))
+            logUpdate(
+                `
+${c.bold(`${c.red('►')} Listening ${c.blue.underline(STATE.kinesisStream)} kinesis stream `)}                
+  - received so far ${c.blue.bold(STATE.count || 0)} records
+${!STATE.count ? '':
+`  - last received record:
+${util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true})}`
+                    }` // TODO: handle pading
+                // TODO: maybe extract in view:
+            )
             return Promise.delay(updateRate).then(printLoop)
         }
+
         return Promise.all(readLoop(shardIterators), printLoop());
     })
     .catch(err => err.name ===  "ResourceNotFoundException", err => {
