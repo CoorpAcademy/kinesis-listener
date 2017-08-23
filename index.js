@@ -61,7 +61,7 @@ const launchListener = () => getStreamShards(kinesisStream)
 
 const resilientListener = () =>
     launchListener().catch(
-        // ProvisionedThroughputExceededException:
+        err => _.includes(['ProvisionedThroughputExceededException', 'ExpiredIteratorException'], err.code),
         err => {
         logUpdate.clear()
         console.log(c.red.bold('Error Occured'));
