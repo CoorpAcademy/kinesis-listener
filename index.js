@@ -59,8 +59,18 @@ const launchListener = () => getStreamShards(kinesisStream)
         return Promise.all([readLoop(shardIterators), printLoop()]);
     })
 
+const resilientListener = () =>
+    launchListener().catch(
+        // ProvisionedThroughputExceededException:
+        err => {
+        logUpdate.clear()
+        console.log(c.red.bold('Error Occured'));
+        console.log(err.message);
+        console.log(c.blue.bold('Relaunching listener'));
+        return resilientListener()
+    });
 
-launchListener()
+resilientListener()
     .catch(err => err.name ===  "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
