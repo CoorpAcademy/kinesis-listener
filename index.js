@@ -20,7 +20,7 @@ const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
-const updateRate = 1000 / 30; //TODO option + change
+const updateRate = 1000 / (argv['refresh-rate'] || 10);
 
 
 const processorsList = [...processors.BASICS]
