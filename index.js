@@ -21,7 +21,7 @@ const batchSize = argv.batchSize || 22; // maybe: slow mode option
 const file = '/tmp/kinesis-log'
 const fileStream = fs.createWriteStream(file)
 
-const STATE = {kinesisStream, batchSize}
+const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / 30; //TODO option + change
 
 const streamProcessor = processors.streamProcessorMaker(fileStream);

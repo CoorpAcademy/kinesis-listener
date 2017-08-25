@@ -1,6 +1,5 @@
 const counterProcessor = (state, context) => record => {
     state.count = (state.count || 0) + 1;
-    if(!state.shardCount) state.shardCount = {}
     state.shardCount[context.ShardId] = (state.shardCount[context.ShardId] || 0) + 1;
 }
 
