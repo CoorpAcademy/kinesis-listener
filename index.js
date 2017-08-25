@@ -18,17 +18,19 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
-const file = '/tmp/kinesis-listener.log'
-const fileStream = fs.createWriteStream(file)
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / 30; //TODO option + change
 
-const streamProcessor = processors.streamProcessorMaker(fileStream, file);
-const processorsList = [...processors.BASICS, streamProcessor]
 
+const processorsList = [...processors.BASICS]
 
-
+if (argv.filename || argv.forward) {
+    const file = argv.filename || '/tmp/kinesis-listener.log';
+    const fileStream = fs.createWriteStream(file);
+    const streamProcessor = processors.streamProcessorMaker(fileStream, file);
+    processorsList.push(streamProcessor);
+}
 
 
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
@@ -40,7 +42,7 @@ const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
             };
             // TODO: see MillisBehind Latest to determine batchsize?
             const records = _.map(data.Records,
-                    record => Object.assign(record, {Data: new Buffer(record.Data, 'base64').toString('utf-8')}));
+                record => Object.assign(record, {Data: new Buffer(record.Data, 'base64').toString('utf-8')}));
             _.map(recordProcessors, recordProcessor => _.map(records, recordProcessor(STATE, context)));
             // maybe: later async record processor
             return {ShardId, ShardIterator: iterator};
