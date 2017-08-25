@@ -18,14 +18,18 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
-const file = '/tmp/kinesis-log'
+const file = '/tmp/kinesis-listener.log'
 const fileStream = fs.createWriteStream(file)
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / 30; //TODO option + change
 
-const streamProcessor = processors.streamProcessorMaker(fileStream);
+const streamProcessor = processors.streamProcessorMaker(fileStream, file);
 const processorsList = [...processors.BASICS, streamProcessor]
+
+
+
+
 
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
