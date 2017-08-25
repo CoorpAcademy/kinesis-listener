@@ -40,6 +40,17 @@ if (argv.filename || argv.forward) {
     processorsList.push(streamProcessor);
 }
 
+if (argv.retro) {
+    STATE.retro = true;
+    const timeRegexp = /^(?=\d\d?[hms])(?:(\d\d?)h)?(?:(\d\d?)m)?(?:(\d\d?)s)?$/;
+    if(!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
+    const match = timeRegexp.exec(argv.retro);
+    const hours = match[1] || 0;
+    const minutes = match[2] || 0;
+    const seconds = match[3] || 0;
+    console.log(hours, 'h', minutes, 'm', seconds, 's')
+    return;
+}
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
