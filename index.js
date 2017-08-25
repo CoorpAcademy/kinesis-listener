@@ -5,7 +5,17 @@ const c = require('chalk');
 const _ = require('lodash');
 const fs = require('fs');
 const logUpdate = require('log-update');
-const argv = require('yargs').argv
+
+const argv = require('yargs')
+    .usage('Usage: $0 [kinesis-stream-name]')
+    .example('$0 log-stream --filename dump.log')
+    .describe('f', 'Forward kinesis record to file').alias('f', 'forward').boolean('f')
+    .describe('F', 'Filename to Forward kinesis records').alias('F', 'filename').boolean('f')
+    .describe('refresh-rate', 'Refresh rate of the dashboard, in time per second (default 10)')
+    .describe('batch-size', 'Size of batch for each kinesis getRecord (default 0)')
+    .number(['refresh-rate', 'batch-size'])
+    .help('h').alias('h', 'help')
+    .argv;
 
 const processors = require('./processors');
 const cliView = require('./cli-view');
@@ -16,14 +26,12 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 }), {suffix: 'P'});
 
 const kinesisStream = argv._[0] || 'bricklane-central-development';
-const batchSize = argv.batchSize || 22; // maybe: slow mode option
-
+const batchSize = argv['batch-size'] || 0; // maybe: slow mode option
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
 
-
-const processorsList = [...processors.BASICS]
+const processorsList = [...processors.BASICS];
 
 if (argv.filename || argv.forward) {
     const file = argv.filename || '/tmp/kinesis-listener.log';
@@ -31,7 +39,6 @@ if (argv.filename || argv.forward) {
     const streamProcessor = processors.streamProcessorMaker(fileStream, file);
     processorsList.push(streamProcessor);
 }
-
 
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
@@ -47,14 +54,14 @@ const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
             // maybe: later async record processor
             return {ShardId, ShardIterator: iterator};
         })
-}
+};
 
 const getStreamShards = (kinesisStream) => kinesis.describeStreamP({StreamName: kinesisStream})
     .then(streamConf => {
         const shardsIds = _.map(streamConf.StreamDescription.Shards, 'ShardId');
         STATE.shardsIds = shardsIds;
         return shardsIds;
-    })
+    });
 
 const launchListener = () => getStreamShards(kinesisStream)
     .map(shardId => kinesis.getShardIteratorP({
@@ -75,7 +82,7 @@ const launchListener = () => getStreamShards(kinesisStream)
         }
 
         return Promise.all([readLoop(shardIterators), printLoop()]);
-    })
+    });
 
 const resilientListener = () =>
     launchListener().catch(
@@ -97,4 +104,4 @@ resilientListener()
         console.log(c.red('Error Occured forcing us to shut down the program:'));
         console.log(err.message);
         process.exit(1);
-    })
+    });
