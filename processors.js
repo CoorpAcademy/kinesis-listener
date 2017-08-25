@@ -1,5 +1,6 @@
-const counterProcessor = state => record => {
+const counterProcessor = (state, context) => record => {
     state.count = (state.count || 0) + 1;
+    state.shardCount[context.ShardId] = (state.shardCount[context.ShardId] || 0) + 1;
 }
 
 const lastRecordProcessor = state => record => {
