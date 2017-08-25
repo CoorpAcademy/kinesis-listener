@@ -4,6 +4,7 @@ const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
 const fs = require('fs');
+const moment = require('moment');
 const logUpdate = require('log-update');
 
 const argv = require('yargs')
@@ -27,6 +28,8 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 
 const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv['batch-size'] || 100; // maybe: slow mode option
+let ShardIteratorType = 'LATEST';
+let Timestamp = new Date();
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
@@ -42,15 +45,17 @@ if (argv.filename || argv.forward) {
 
 if (argv.retro) {
     STATE.retro = true;
-    const timeRegexp = /^(?=\d\d?[hms])(?:(\d\d?)h)?(?:(\d\d?)m)?(?:(\d\d?)s)?$/;
+    const timeRegexp = /^(?=\d\d*[hms])(?:(\d\d?)h)?(?:(\d\d*)m)?(?:(\d\d*)s)?$/;
     if(!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
     const match = timeRegexp.exec(argv.retro);
     const hours = match[1] || 0;
     const minutes = match[2] || 0;
     const seconds = match[3] || 0;
-    console.log(hours, 'h', minutes, 'm', seconds, 's')
-    return;
+    const timestamp = moment().subtract(hours, 'hours').subtract(minutes, 'minutes').subtract(seconds, 'seconds');
+    ShardIteratorType = 'AT_TIMESTAMP';
+    Timestamp = timestamp.toDate();
 }
+
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
@@ -78,7 +83,8 @@ const launchListener = () => getStreamShards(kinesisStream)
     .map(shardId => kinesis.getShardIteratorP({
         StreamName: kinesisStream,
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
-        ShardIteratorType: 'LATEST'
+        ShardIteratorType,
+        Timestamp
     }).then(si => ({ShardId: shardId, ShardIterator: si.ShardIterator})))
     .then((shardIterators) => {
         const kinesisIterator = readIterator(processorsList);
