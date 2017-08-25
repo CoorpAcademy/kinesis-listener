@@ -3,6 +3,7 @@ const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
+const fs = require('fs');
 const logUpdate = require('log-update');
 const argv = require('yargs').argv
 
@@ -17,8 +18,13 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 const kinesisStream = argv._[0] || 'bricklane-central-development';
 const batchSize = argv.batchSize || 22; // maybe: slow mode option
 
+const file = '/tmp/kinesis-log'
+const fileStream  = fs.createWriteStream(file)
+
 const STATE = {kinesisStream, batchSize}
 const updateRate = 1000 / 30;
+
+const processorsList = [...processors.BASICS, processors.streamProcessor(fileStream)]
 
 const readIterator = recordProcessors => ShardIterator => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
@@ -45,7 +51,7 @@ const launchListener = () => getStreamShards(kinesisStream)
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'}).then(si => si.ShardIterator))
     .then(shardIterators => {
-        const kinesisIterator = readIterator(processors.ALL); //TODO configurable
+        const kinesisIterator = readIterator(processorsList);
         const readLoop = (initialIterators) => {
             // TODO graceful STOP
             return Promise.map(initialIterators, kinesisIterator)
