@@ -26,7 +26,7 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
 }), {suffix: 'P'});
 
 const kinesisStream = argv._[0] || 'bricklane-central-development';
-const batchSize = argv['batch-size'] || 0; // maybe: slow mode option
+const batchSize = argv['batch-size'] || 100; // maybe: slow mode option
 
 const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
