@@ -18,7 +18,7 @@ const timestampProcessor = state => record => {
     state.timestampLastReceived = record.ApproximateArrivalTimestamp;
 }
 
-const streamProcessor = stream => state => record => {
+const streamProcessorMaker = stream => state => record => {
     // TODO: info that is streaming to x file? / message
     stream.write(record.Data);
     stream.write('\n');
@@ -28,5 +28,5 @@ module.exports.counterProcessor = counterProcessor;
 module.exports.lastRecordProcessor = lastRecordProcessor;
 module.exports.lastJsonRecordProcessor = lastJsonRecordProcessor;
 module.exports.timestampProcessor = timestampProcessor;
-module.exports.streamProcessor = streamProcessor;
+module.exports.streamProcessorMaker = streamProcessorMaker;
 module.exports.BASICS = [counterProcessor, lastRecordProcessor, lastJsonRecordProcessor, timestampProcessor]

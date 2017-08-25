@@ -22,21 +22,24 @@ const file = '/tmp/kinesis-log'
 const fileStream = fs.createWriteStream(file)
 
 const STATE = {kinesisStream, batchSize}
-const updateRate = 1000 / 30;
+const updateRate = 1000 / 30; //TODO option + change
 
-const processorsList = [...processors.BASICS, processors.streamProcessor(fileStream)]
+const streamProcessor = processors.streamProcessorMaker(fileStream);
+const processorsList = [...processors.BASICS, streamProcessor]
 
-const readIterator = recordProcessors => ShardIterator => {
+const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
     return kinesis.getRecordsP({ShardIterator, Limit: batchSize})
         .then(data => {
             const iterator = data.NextShardIterator;
+            const context = {
+                ShardId, ShardIterator, nRecords: data.Records.length
+            };
             // TODO: see MillisBehind Latest to determine batchsize?
             const records = _.map(data.Records,
                     record => Object.assign(record, {Data: new Buffer(record.Data, 'base64').toString('utf-8')}));
-            _.map(recordProcessors,
-                recordProcessor => _.map(records, recordProcessor(STATE)));
+            _.map(recordProcessors, recordProcessor => _.map(records, recordProcessor(STATE, context)));
             // maybe: later async record processor
-            return iterator;
+            return {ShardId, ShardIterator: iterator};
         })
 }
 
@@ -52,8 +55,8 @@ const launchListener = () => getStreamShards(kinesisStream)
         StreamName: kinesisStream,
         ShardId: shardId, // TODO: type later configurable -> X minutes ago
         ShardIteratorType: 'LATEST'
-    }).then(si => si.ShardIterator))
-    .then(shardIterators => {
+    }).then(si => ({ShardId: shardId, ShardIterator: si.ShardIterator})))
+    .then((shardIterators) => {
         const kinesisIterator = readIterator(processorsList);
         const readLoop = (initialIterators) => {
             // TODO graceful STOP
