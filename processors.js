@@ -3,24 +3,24 @@ const counterProcessor = state => record => {
 }
 
 const lastRecordProcessor = state => record => {
-    state.lastRecord = record;
+    state.lastRecord = record.Data;
 }
 
 const lastJsonRecordProcessor = state => record => {
     try {
-        state.lastJsonRecord = JSON.parse(record);
+        state.lastJsonRecord = JSON.parse(record.Data);
     } catch (err) {
         state.lastJsonRecord = undefined;
     }
 }
 
 const timestampProcessor = state => record => {
-    state.timestampLastReceived = new Date();
+    state.timestampLastReceived = record.ApproximateArrivalTimestamp;
 }
 
 const streamProcessor = stream => state => record => {
     // TODO: info that is streaming to x file? / message
-    stream.write(record);
+    stream.write(record.Data);
     stream.write('\n');
 }
 

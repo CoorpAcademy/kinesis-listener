@@ -31,7 +31,8 @@ const readIterator = recordProcessors => ShardIterator => {
         .then(data => {
             const iterator = data.NextShardIterator;
             // TODO: see MillisBehind Latest to determine batchsize?
-            const records = _.map(data.Records, record => new Buffer(record.Data, 'base64').toString('utf-8'));
+            const records = _.map(data.Records,
+                    record => Object.assign(record, {Data: new Buffer(record.Data, 'base64').toString('utf-8')}));
             _.map(recordProcessors,
                 recordProcessor => _.map(records, recordProcessor(STATE)));
             // maybe: later async record processor
