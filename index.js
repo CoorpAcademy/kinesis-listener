@@ -6,6 +6,8 @@ const _ = require('lodash');
 const fs = require('fs');
 const moment = require('moment');
 const logUpdate = require('log-update');
+const readline = require('readline');
+const util = require('util');
 
 const argv = require('yargs')
     .usage('Usage: $0 [kinesis-stream-name]')
@@ -126,3 +128,13 @@ resilientListener()
         console.log(err.message);
         process.exit(1);
     });
+
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
+process.stdin.on('keypress', (str, key) => {
+    if(key.name === 'return'){
+        logUpdate.clear();
+        console.log(util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true}));
+        logUpdate(cliView(STATE));
+    }
+})
