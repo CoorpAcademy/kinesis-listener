@@ -54,6 +54,8 @@ if (argv.retro) {
     const timestamp = moment().subtract(hours, 'hours').subtract(minutes, 'minutes').subtract(seconds, 'seconds');
     ShardIteratorType = 'AT_TIMESTAMP';
     Timestamp = timestamp.toDate();
+} else if (argv.horizon) {
+    ShardIteratorType = 'TRIM_HORIZON';
 }
 
 const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
