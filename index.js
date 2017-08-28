@@ -42,7 +42,7 @@ let Timestamp = new Date();
 
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
 const processorsList = [...processors.BASICS];
-const dateFormat = argv['time-format'] || (argv.d && 'hh:mm:ss') ;
+const dateFormat = argv['time-format'] || (argv.d && 'hh:mm:ss');
 
 const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: []}
 
@@ -57,11 +57,11 @@ if (argv.filename || argv.forward) {
 if (argv.retro) {
     STATE.retro = true;
     const timeRegexp = /^(?=\d\d*[hms])(?:(\d\d?)h)?(?:(\d\d*)m)?(?:(\d\d*)s)?$/;
-    if(!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
+    if (!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
     const match = timeRegexp.exec(argv.retro);
-    const hours = match[1] || 0;
-    const minutes = match[2] || 0;
-    const seconds = match[3] || 0;
+    const hours = match[1] || 0;
+    const minutes = match[2] || 0;
+    const seconds = match[3] || 0;
     const timestamp = moment().subtract(hours, 'hours').subtract(minutes, 'minutes').subtract(seconds, 'seconds');
     ShardIteratorType = 'AT_TIMESTAMP';
     Timestamp = timestamp.toDate();
@@ -148,7 +148,7 @@ readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && (key.name === 'c' || key.name === 'd')) {
-        console.log(c.red('Exiting '+ c.bold('kinesis-listener')));
+        console.log(c.red('Exiting ' + c.bold('kinesis-listener')));
         process.exit(0);
     }
     if (key.ctrl && key.name === 'l') {
@@ -156,7 +156,7 @@ process.stdin.on('keypress', (str, key) => {
         console.log("\r\n".repeat(process.stdout.getWindowSize()[1]) + "\x1B[0f");
         logUpdate(cliView.view(STATE));
     }
-    if(key.name === 'return'){
+    if (key.name === 'return') {
         logUpdate.clear();
         console.log(cliView.checkpoint(STATE));
         logUpdate(cliView.view(STATE));
