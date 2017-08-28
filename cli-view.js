@@ -23,4 +23,11 @@ ${!state.fileStreaming ? '':
   - last received record (at ${c.dim.grey(state.timestampLastReceived)}) :
 ${indentString(util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true}), 4)}`}`;
 
-module.exports = view
+const checkpoint = state =>
+`Checkpoint at ${c.dim.grey(new Date())}: ` + (state.lastJsonRecord ?
+`${state.deltaCount} new records, last being:
+${util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true})}` :
+`No record received so far`);
+
+module.exports.view = view;
+module.exports.checkpoint = checkpoint;

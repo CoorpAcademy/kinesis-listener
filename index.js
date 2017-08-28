@@ -100,7 +100,7 @@ const launchListener = () => getStreamShards(kinesisStream)
                 .then(readLoop)
         }
         const printLoop = () => {
-            logUpdate(cliView(STATE));
+            logUpdate(cliView.view(STATE));
             return Promise.delay(updateRate).then(printLoop);
         }
 
@@ -138,7 +138,7 @@ process.stdin.on('keypress', (str, key) => {
     }
     if(key.name === 'return'){
         logUpdate.clear();
-        console.log(util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true}));
-        logUpdate(cliView(STATE));
+        console.log(cliView.checkpoint(STATE));
+        logUpdate(cliView.view(STATE));
     }
 })
