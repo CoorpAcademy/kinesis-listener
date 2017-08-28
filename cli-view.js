@@ -21,7 +21,9 @@ ${!state.fileStreaming ? '' :
             } ${state.fileStreamingFile ? c.dim.underline(state.fileStreamingFile) : ''}
 `}${!state.count ? '' :
         `  - Speed Estimation: ${c.bold.yellow(speedSpinner.frames[state.count % speedSpinner.frames.length])}
-  - last received record (at ${c.dim.grey(moment(state.timestampLastReceived).format(state.dateFormat))}) :
+  - last received record ${
+    moment(state.timestampLastReceived).fromNow()
+            } (at ${c.dim.grey(moment(state.timestampLastReceived).format(state.dateFormat))}) :
 ${indentString(util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true}), 4)}`}`;
 
 const checkpoint = state => {
