@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const c = require('chalk');
 const indentString = require('indent-string');
+const moment = require('moment');
 const util = require('util');
 const cliSpinners = require('cli-spinners');
 
@@ -20,13 +21,13 @@ ${!state.fileStreaming ? '' :
             } ${state.fileStreamingFile ? c.dim.underline(state.fileStreamingFile) : ''}
 `}${!state.count ? '' :
         `  - Speed Estimation: ${c.bold.yellow(speedSpinner.frames[state.count % speedSpinner.frames.length])}
-  - last received record (at ${c.dim.grey(state.timestampLastReceived)}) :
+  - last received record (at ${c.dim.grey(moment(state.timestampLastReceived).format(state.dateFormat))}) :
 ${indentString(util.inspect(_.omit(state.lastJsonRecord, ['content']), {depth: null, colors: true}), 4)}`}`;
 
 const checkpoint = state => {
     const deltaCount = state.count - (state.lastCheckpointCount || 0);
     state.lastCheckpointCount = state.count;
-    return `Checkpoint at ${c.dim.grey(new Date())}: ` +
+    return `Checkpoint at ${c.dim.grey(moment().format(state.dateFormat))}: ` +
         (!state.lastJsonRecord ?
             `No record received so far` :
             (!deltaCount ? 'No new record since last checkpoint' :

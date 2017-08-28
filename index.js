@@ -35,10 +35,12 @@ const batchSize = argv['batch-size'] || 100; // maybe: slow mode option
 let ShardIteratorType = 'LATEST';
 let Timestamp = new Date();
 
-const STATE = {kinesisStream, batchSize, count: 0, shardCount: []}
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
-
 const processorsList = [...processors.BASICS];
+const dateFormat = argv['date-format'];
+
+const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: []}
+
 
 if (argv.filename || argv.forward) {
     const file = argv.filename || '/tmp/kinesis-listener.log';
