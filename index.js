@@ -12,6 +12,7 @@ const util = require('util');
 const argv = require('yargs')
     .usage('Usage: $0 [kinesis-stream-name]')
     .example('$0 log-stream --filename dump.log')
+    .describe('endpoint', 'Specify an alternative endpoint for the kinesis sdk').alias('e', 'endpoint').string('e')
     .describe('forward', 'Forward kinesis record to file').alias('f', 'forward').boolean('f')
     .describe('filename', 'Filename to Forward kinesis records').alias('F', 'filename').string('F')
     .describe('retro', 'Start to read "00h11m2s" time ago').alias('r', 'retro').string('r')
@@ -30,6 +31,7 @@ const cliView = require('./cli-view');
 
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
+    endpoint: argv.endpoint,
     region: process.env.AWS_REGION || 'eu-west-1'
 }), {suffix: 'P'});
 
@@ -127,6 +129,14 @@ resilientListener()
     .catch(err => err.name === "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
+    })
+    .catch(err => _.includes(['UnknownEndpoint', 'NetworkingError'], err.name), err => {
+        if (argv.endpoint)
+            console.log(c.red(`Provided Endpoint ${c.bold(argv.endpoint)} is not accessible`));
+        else
+            console.log(c.red('Unaccessible AWS region endpoint, check your internet connection'));
+        console.log(err.message);
+        process.exit(3);
     })
     .catch(err => {
         console.log(c.red('Error Occured forcing us to shut down the program:'));
