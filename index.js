@@ -132,6 +132,10 @@ resilientListener()
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
+    if (key && key.ctrl && (key.name === 'c' || key.name === 'd')) {
+        console.log(c.red('Exiting '+ c.bold('kinesis-listener')));
+        process.exit(0);
+    }
     if(key.name === 'return'){
         logUpdate.clear();
         console.log(util.inspect(_.omit(STATE.lastJsonRecord, ['content']), {depth: null, colors: true}));
