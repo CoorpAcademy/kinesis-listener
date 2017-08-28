@@ -18,6 +18,8 @@ const argv = require('yargs')
     .describe('horizon', 'Trim Horizon read').alias('H', 'horizon').boolean('f')
     .describe('refresh-rate', 'Refresh rate of the dashboard, in time per second (default 10)')
     .describe('batch-size', 'Size of batch for each kinesis getRecord (default 0)')
+    .describe('time-format', 'Format to print date with').alias('t', 'time-format')
+    .describe('day-format', 'Use hh:mm:ss day date format').alias('d', 'day-format')
     .number(['refresh-rate', 'batch-size'])
     .help('h').alias('h', 'help')
     .argv;
@@ -37,7 +39,7 @@ let Timestamp = new Date();
 
 const updateRate = 1000 / (argv['refresh-rate'] || 10);
 const processorsList = [...processors.BASICS];
-const dateFormat = argv['date-format'];
+const dateFormat = argv['time-format'] || (argv.d && 'hh:mm:ss') ;
 
 const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: []}
 
