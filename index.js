@@ -41,10 +41,12 @@ const updateRate = 1000 / (argv['refresh-rate'] || 10);
 const processorsList = [...processors.BASICS];
 const dateFormat = argv['time-format'] || (argv.d && 'hh:mm:ss');
 
-const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: [], updateRate}
+const settings = {}; // maybe rename global
+settings.state = {count: 0, shardCount: []};
 // TODO: maybe encapsulate in the kinesis-listener
+settings.config = {batchSize, dateFormat, updateRate};
 
-const {resilientListener} = require('./lib/kinesis-listener')(kinesis, STATE)
+const {resilientListener} = require('./lib/kinesis-listener')(kinesis, settings);
 const {selectStream} = require('./lib/kinesis-selector')(kinesis);
 
 if (argv.filename || argv.forward) {
@@ -55,7 +57,7 @@ if (argv.filename || argv.forward) {
 }
 
 if (argv.retro) {
-    STATE.retro = true;
+    setting.config.retro = true;
     const timeRegexp = /^(?=\d\d*[hms])(?:(\d\d?)h)?(?:(\d\d*)m)?(?:(\d\d*)s)?$/;
     if (!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
     const match = timeRegexp.exec(argv.retro);
@@ -69,13 +71,12 @@ if (argv.retro) {
     ShardIteratorType = 'TRIM_HORIZON';
 }
 
-
 const main = () => {
   const streamNameP = kinesisStream ? Promise.resolve(kinesisStream) : selectStream()
   return streamNameP
     .then(kinesisStream => {
-      STATE.kinesisStream = kinesisStream;
-      cliView.setUpKeyboardInteraction(STATE);
+      settings.kinesisStream = kinesisStream;
+      cliView.setUpKeyboardInteraction(settings.config, settings.state);
       return resilientListener({kinesisStream, ShardIteratorType, Timestamp, processorsList})
         .catch(err => err.name === "ResourceNotFoundException", err => {
           console.log(err.message);
