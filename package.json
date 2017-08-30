@@ -4,7 +4,8 @@
   "description": "Cli to listen to a kinesis stream",
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "cover": "nyc npm run test"
   },
   "preferGlobal": "true",
   "bin": {
@@ -30,6 +31,7 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
-    "ava": "^0.22.0"
+    "ava": "^0.22.0",
+    "nyc": "^11.1.0"
   }
 }
