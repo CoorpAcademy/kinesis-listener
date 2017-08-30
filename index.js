@@ -68,6 +68,7 @@ const main = () => {
     .then(kinesisStream => {
       settings.config.kinesisStream = kinesisStream;
       cliView.setUpKeyboardInteraction(settings.config, settings.state);
+
       return resilientListener(settings.config)
         .catch(err => err.name === "ResourceNotFoundException", err => {
           console.log(err.message);
