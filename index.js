@@ -34,7 +34,7 @@ const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     region: process.env.AWS_REGION || 'eu-west-1'
 }), {suffix: 'P'});
 
-const kinesisStream = argv._[0] || 'bricklane-central-development';
+const kinesisStream = argv._[0];
 const batchSize = argv['batch-size'] || 100; // maybe: slow mode option
 let ShardIteratorType = 'LATEST';
 let Timestamp = new Date();
@@ -47,7 +47,7 @@ const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: [], u
 // TODO: maybe encapsulate in the kinesis-listener
 
 const {resilientListener} = require('./lib/kinesis-listener')(kinesis, STATE)
-const {promptForStream} = require('./lib/kinesis-selector')(kinesis);
+const {selectStream} = require('./lib/kinesis-selector')(kinesis);
 
 if (argv.filename || argv.forward) {
     const file = argv.filename || '/tmp/kinesis-listener.log';
@@ -71,32 +71,40 @@ if (argv.retro) {
     ShardIteratorType = 'TRIM_HORIZON';
 }
 
-const main = () => resilientListener({kinesisStream, ShardIteratorType, Timestamp, processorsList})
-    .catch(err => err.name === "ResourceNotFoundException", err => {
-        console.log(err.message);
-        process.exit(2);
-    })
-    .catch(err => _.includes(['UnknownEndpoint', 'NetworkingError'], err.name), err => {
-        if (argv.endpoint)
+
+const main = () => {
+  const streamNameP = kinesisStream ? Promise.resolve(kinesisStream) : selectStream()
+  return streamNameP
+    .then(kinesisStream => {
+      STATE.kinesisStream = kinesisStream;
+      return resilientListener({kinesisStream, ShardIteratorType, Timestamp, processorsList})
+        .catch(err => err.name === "ResourceNotFoundException", err => {
+          console.log(err.message);
+          process.exit(2);
+        })
+        .catch(err => _.includes(['UnknownEndpoint', 'NetworkingError'], err.name), err => {
+          if (argv.endpoint)
             console.log(c.red(`Provided Endpoint ${c.bold(argv.endpoint)} is not accessible`));
-        else
+          else
             console.log(c.red('Unaccessible AWS region endpoint, check your internet connection'));
-        console.log(err.message);
-        process.exit(3);
+          console.log(err.message);
+          process.exit(3);
+        })
+        .catch(err => {
+          console.log(c.red('Error Occured forcing us to shut down the program:'));
+          console.log(err.message);
+          process.exit(1);
+        });
     })
-    .catch(err => {
-        console.log(c.red('Error Occured forcing us to shut down the program:'));
-        console.log(err.message);
-        process.exit(1);
-    });
+};
 
 module.exports = main;
 
 if(!module.parent) {
 
   main();
-
-  readline.emitKeypressEvents(process.stdin);
+ // FIXME setup at good moment
+ /* readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
   process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && (key.name === 'c' || key.name === 'd')) {
@@ -114,4 +122,5 @@ if(!module.parent) {
       logUpdate(cliView.view(STATE));
     }
   });
+  */
 }
