@@ -125,7 +125,7 @@ const resilientListener = () =>
             return resilientListener()
         });
 
-resilientListener()
+const main = () => resilientListener()
     .catch(err => err.name === "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
@@ -144,21 +144,26 @@ resilientListener()
         process.exit(1);
     });
 
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
+if(!module.parent) {
+
+  main();
+
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+  process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && (key.name === 'c' || key.name === 'd')) {
-        console.log(c.red('Exiting ' + c.bold('kinesis-listener')));
-        process.exit(0);
+      console.log(c.red('Exiting ' + c.bold('kinesis-listener')));
+      process.exit(0);
     }
     if (key.ctrl && key.name === 'l') {
-        logUpdate.clear();
-        console.log("\r\n".repeat(process.stdout.getWindowSize()[1]) + "\x1B[0f");
-        logUpdate(cliView.view(STATE));
+      logUpdate.clear();
+      console.log("\r\n".repeat(process.stdout.getWindowSize()[1]) + "\x1B[0f");
+      logUpdate(cliView.view(STATE));
     }
     if (key.name === 'return') {
-        logUpdate.clear();
-        console.log(cliView.checkpoint(STATE));
-        logUpdate(cliView.view(STATE));
+      logUpdate.clear();
+      console.log(cliView.checkpoint(STATE));
+      logUpdate(cliView.view(STATE));
     }
-})
+  });
+}
