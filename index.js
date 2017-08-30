@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
 const fs = require('fs');
-const moment = require('moment');
+const {parseRetroDate} = require('./lib/utils')
 
 const argv = require('yargs')
   .usage('Usage: $0 [kinesis-stream-name]')
@@ -55,16 +55,9 @@ if (argv.filename || argv.forward) {
 }
 
 if (argv.retro) {
+  settings.config.Timestamp = parseRetroDate(argv.retro);
   settings.config.retro = true;
-  const timeRegexp = /^(?=\d\d*[hms])(?:(\d\d?)h)?(?:(\d\d*)m)?(?:(\d\d*)s)?$/;
-  if (!argv.retro.match(timeRegexp)) throw new Error(`Invalide retro time format: ${argv.retro}`);
-  const match = timeRegexp.exec(argv.retro);
-  const hours = match[1] || 0;
-  const minutes = match[2] || 0;
-  const seconds = match[3] || 0;
-  const timestamp = moment().subtract(hours, 'hours').subtract(minutes, 'minutes').subtract(seconds, 'seconds');
   settings.config.ShardIteratorType = 'AT_TIMESTAMP';
-  settings.config.Timestamp = timestamp.toDate();
 } else if (argv.horizon) {
   settings.config.ShardIteratorType = 'TRIM_HORIZON';
 }
