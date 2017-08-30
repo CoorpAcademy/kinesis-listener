@@ -26,8 +26,8 @@ const argv = require('yargs')
     .help('h').alias('h', 'help')
     .argv;
 
-const processors = require('./processors');
-const cliView = require('./cli-view');
+const processors = require('./lib/processors');
+const cliView = require('./lib/cli-view');
 
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
     apiVersion: '2013-12-02',
