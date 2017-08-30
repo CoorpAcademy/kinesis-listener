@@ -144,6 +144,8 @@ const main = () => resilientListener()
         process.exit(1);
     });
 
+module.exports = main;
+
 if(!module.parent) {
 
   main();
