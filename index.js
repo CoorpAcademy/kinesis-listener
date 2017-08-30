@@ -7,7 +7,6 @@ const fs = require('fs');
 const moment = require('moment');
 const logUpdate = require('log-update');
 const readline = require('readline');
-const util = require('util');
 
 const argv = require('yargs')
     .usage('Usage: $0 [kinesis-stream-name]')
