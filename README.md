@@ -1,6 +1,7 @@
 kinesis-listener
 ================
 [![Build Status](https://travis-ci.com/CoorpAcademy/kinesis-listener.svg?token=KnYzxEMEXjZwczDR8x2L&branch=master)](https://travis-ci.com/CoorpAcademy/kinesis-listener)
+[![codecov](https://codecov.io/gh/CoorpAcademy/kinesis-listener/branch/master/graph/badge.svg)](https://codecov.io/gh/CoorpAcademy/kinesis-listener)
 
 `kinesis-listener` is a cli to listen to kinesis stream and have
 an idea of the messages that transit
