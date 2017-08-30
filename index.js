@@ -5,8 +5,6 @@ const c = require('chalk');
 const _ = require('lodash');
 const fs = require('fs');
 const moment = require('moment');
-const logUpdate = require('log-update');
-const readline = require('readline');
 
 const argv = require('yargs')
     .usage('Usage: $0 [kinesis-stream-name]')
@@ -77,6 +75,7 @@ const main = () => {
   return streamNameP
     .then(kinesisStream => {
       STATE.kinesisStream = kinesisStream;
+      cliView.setUpKeyboardInteraction(STATE);
       return resilientListener({kinesisStream, ShardIteratorType, Timestamp, processorsList})
         .catch(err => err.name === "ResourceNotFoundException", err => {
           console.log(err.message);
@@ -101,26 +100,5 @@ const main = () => {
 module.exports = main;
 
 if(!module.parent) {
-
   main();
- // FIXME setup at good moment
- /* readline.emitKeypressEvents(process.stdin);
-  process.stdin.setRawMode(true);
-  process.stdin.on('keypress', (str, key) => {
-    if (key.ctrl && (key.name === 'c' || key.name === 'd')) {
-      console.log(c.red('Exiting ' + c.bold('kinesis-listener')));
-      process.exit(0);
-    }
-    if (key.ctrl && key.name === 'l') {
-      logUpdate.clear();
-      console.log("\r\n".repeat(process.stdout.getWindowSize()[1]) + "\x1B[0f");
-      logUpdate(cliView.view(STATE));
-    }
-    if (key.name === 'return') {
-      logUpdate.clear();
-      console.log(cliView.checkpoint(STATE));
-      logUpdate(cliView.view(STATE));
-    }
-  });
-  */
 }
