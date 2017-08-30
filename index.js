@@ -43,7 +43,8 @@ const updateRate = 1000 / (argv['refresh-rate'] || 10);
 const processorsList = [...processors.BASICS];
 const dateFormat = argv['time-format'] || (argv.d && 'hh:mm:ss');
 
-const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: []}
+const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: [], updateRate}
+// TODO: maybe encapsulate in the kinesis-listener
 
 const {resilientListener} = require('./lib/kinesis-listener')(kinesis, STATE)
 
@@ -69,7 +70,7 @@ if (argv.retro) {
     ShardIteratorType = 'TRIM_HORIZON';
 }
 
-const main = () => resilientListener(kinesisStream)
+const main = () => resilientListener({kinesisStream, ShardIteratorType, Timestamp, processorsList})
     .catch(err => err.name === "ResourceNotFoundException", err => {
         console.log(err.message);
         process.exit(2);
