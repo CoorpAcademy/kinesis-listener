@@ -47,6 +47,7 @@ const STATE = {kinesisStream, batchSize, dateFormat, count: 0, shardCount: [], u
 // TODO: maybe encapsulate in the kinesis-listener
 
 const {resilientListener} = require('./lib/kinesis-listener')(kinesis, STATE)
+const {promptForStream} = require('./lib/kinesis-selector')(kinesis);
 
 if (argv.filename || argv.forward) {
     const file = argv.filename || '/tmp/kinesis-listener.log';

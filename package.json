@@ -25,6 +25,7 @@
     "chalk": "^2.1.0",
     "cli-spinners": "^1.0.0",
     "indent-string": "^3.2.0",
+    "inquirer": "^3.2.2",
     "lodash": "^4.17.4",
     "log-update": "^2.1.0",
     "moment": "^2.18.1",
