@@ -2,6 +2,6 @@ const test = require('ava');
 
 const main = require('..');
 
-test('counterProcessor increments count', t => {
+test('main is a function', t => {
  t.deepEqual(typeof main, 'function')
 });
