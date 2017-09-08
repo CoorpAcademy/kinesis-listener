@@ -5,7 +5,7 @@ kinesis-listener
 [![codecov](https://codecov.io/gh/CoorpAcademy/kinesis-listener/branch/master/graph/badge.svg)](https://codecov.io/gh/CoorpAcademy/kinesis-listener)
 
 `kinesis-listener` is a cli to listen to kinesis stream and have
-an idea of the messages that transit
+an idea of the messages that transit.
 
 ## Installation
 
@@ -43,7 +43,7 @@ If you it <kbd>RETURN</kbd> it will print a checkpoint with the last
 message received. This checkpoint wont be erase.
 
 With <kbd>Ctrl-L</kbd> you can recenter the program to the dashboard and 
-hence hide the last checkpoint. this will not erase them 
+hence hide the last checkpoint. This will not erase them.
 
 By default `kinesis-listener` start to listen now, but it possible to start at 
 *TRIM_HORIZON* with option `-H/---horizon`, or to precise some relative time with
@@ -74,6 +74,6 @@ Options:
   -d, --day-format    Use hh:mm:ss day date format                     [boolean]
 
 Examples:
-  index.js log-stream --filename dump.log
+  kinesis-listener log-stream --filename dump.log
 
 ```
