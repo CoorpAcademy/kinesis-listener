@@ -4,7 +4,8 @@ const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash');
 const fs = require('fs');
-const {parseRetroDate} = require('./lib/utils')
+const {parseRetroDate} = require('./lib/utils');
+const {customChain} = require('./lib/aws-credentials-utils');
 
 const argv = require('yargs')
   .usage('Usage: $0 [kinesis-stream-name]')
@@ -29,6 +30,7 @@ const cliView = require('./lib/cli-view');
 const kinesis = Promise.promisifyAll(new AWS.Kinesis({
   apiVersion: '2013-12-02',
   endpoint: argv.endpoint,
+  credentialProvider: customChain,
   region: process.env.AWS_REGION || 'eu-west-1'
 }), {suffix: 'P'});
 
