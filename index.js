@@ -43,6 +43,7 @@ settings.config = {
   dateFormat: argv['time-format'] || (argv.d && 'hh:mm:ss'),
   batchSize: argv['batch-size'] || 100,
   updateRate: 1000 / (argv['refresh-rate'] || 10),
+  fetchInterval: 200,
   processorsList: [...processors.BASICS]
 };
 
