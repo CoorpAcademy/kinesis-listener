@@ -59,19 +59,20 @@ customized with the `-F/--filename` option.
 Usage: kinesis-listener [kinesis-stream-name]
 
 Options:
-  -h, --help          Show help                                        [boolean]
-  -e, --endpoint      Specify an alternative endpoint for the kinesis sdk
+  -h, --help            Show help                                      [boolean]
+  -e, --endpoint        Specify an alternative endpoint for the kinesis sdk
                                                                         [string]
-  -f, --forward       Forward kinesis record to file                   [boolean]
-  -F, --filename      Filename to Forward kinesis records               [string]
-  -r, --retro         Start to read "00h11m2s" time ago                 [string]
-  -H, --horizon       Trim Horizon read                                [boolean]
-  -R, --refresh-rate  Refresh rate of the dashboard, in time per second (default
-                      10)                                               [number]
-  -b, --batch-size    Size of batch for each kinesis getRecord (default 100)
+  -f, --forward         Forward kinesis record to file                 [boolean]
+  -F, --filename        Filename to Forward kinesis records             [string]
+  -r, --retro           Start to read "00h11m2s" time ago               [string]
+  -H, --horizon         Trim Horizon read                              [boolean]
+  -R, --refresh-rate    Refresh rate of the dashboard, in time per second
+                        (default 10)                                    [number]
+  -b, --batch-size      Size of batch for each kinesis getRecord (default 100)
                                                                         [number]
-  -t, --time-format   Format to print date with                         [string]
-  -d, --day-format    Use hh:mm:ss day date format                     [boolean]
+  -t, --time-format     Format to print date with                       [string]
+  -d, --day-format      Use hh:mm:ss day date format                   [boolean]
+  -i, --fetch-interval  fetch-rate of kinesis records in ms
 
 Examples:
   kinesis-listener log-stream --filename dump.log
