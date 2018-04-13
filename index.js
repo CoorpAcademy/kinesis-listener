@@ -28,7 +28,7 @@ const argv = require('yargs')
 const processors = require('./lib/processors');
 const cliView = require('./lib/cli-view');
 
-const kinesis = Promise.promisifyAll(new AWS.Kinesis({
+const kinesis = Promise.promisifyAll(new AWS.DynamoDBStreams({
   apiVersion: '2013-12-02',
   endpoint: argv.endpoint,
   credentialProvider: customChain,
