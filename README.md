@@ -24,6 +24,22 @@ kinesis-listener my-kinesis [--options]
 
 ## Usage
 
+Make sure you have already install aws-cli via pip
+
+```
+pip install awscli
+```
+
+Make sure you have a AWS key. Go to AWS IAM / USERS, create a key and download you Access key ID and Secret access key
+
+```
+> aws configure
+AWS Access Key ID [****************E23Q]: YOUR_ID
+AWS Secret Access Key [****************/iP9]: YOUR_SECRET
+Default region name [None]: eu-west-1
+Default output format [None]: 
+```  
+
 `kinesis-listener` is to be invoked with the desired option.
 It will run in the foreground keeping a dashboard updated with the 
 last record received:
