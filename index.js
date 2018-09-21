@@ -1,39 +1,62 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
+const fs = require('fs');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
-const _ = require('lodash');
-const fs = require('fs');
+const yargs = require('yargs');
+const _ = require('lodash/fp');
 const {parseRetroDate} = require('./lib/utils');
 const {customChain} = require('./lib/aws-credentials-utils');
 
-const argv = require('yargs')
+const argv = yargs
   .usage('Usage: $0 [kinesis-stream-name]')
   .example('$0 log-stream --filename dump.log')
-  .describe('endpoint', 'Specify an alternative endpoint for the kinesis sdk').alias('e', 'endpoint').string('e')
-  .describe('forward', 'Forward kinesis record to file').alias('f', 'forward').boolean('f')
-  .describe('filename', 'Filename to Forward kinesis records').alias('F', 'filename').string('F')
-  .describe('retro', 'Start to read "00h11m2s" time ago').alias('r', 'retro').string('r')
-  .describe('horizon', 'Trim Horizon read').alias('H', 'horizon').boolean('H')
+  .describe('endpoint', 'Specify an alternative endpoint for the kinesis sdk')
+  .alias('e', 'endpoint')
+  .string('e')
+  .describe('forward', 'Forward kinesis record to file')
+  .alias('f', 'forward')
+  .boolean('f')
+  .describe('filename', 'Filename to Forward kinesis records')
+  .alias('F', 'filename')
+  .string('F')
+  .describe('retro', 'Start to read "00h11m2s" time ago')
+  .alias('r', 'retro')
+  .string('r')
+  .describe('horizon', 'Trim Horizon read')
+  .alias('H', 'horizon')
+  .boolean('H')
   .describe('refresh-rate', 'Refresh rate of the dashboard, in time per second (default 10)')
-  .alias('R', 'refresh-rate').number('R')
-  .describe('batch-size', 'Size of batch for each kinesis getRecord (default 100)').alias('b', 'batch-size')
-  .describe('time-format', 'Format to print date with').alias('t', 'time-format').string('t')
-  .describe('day-format', 'Use hh:mm:ss day date format').alias('d', 'day-format').boolean('d')
-  .describe('fetch-interval', 'fetch-rate of kinesis records in ms').alias('i', 'fetch-interval').number('1')
+  .alias('R', 'refresh-rate')
+  .number('R')
+  .describe('batch-size', 'Size of batch for each kinesis getRecord (default 100)')
+  .alias('b', 'batch-size')
+  .describe('time-format', 'Format to print date with')
+  .alias('t', 'time-format')
+  .string('t')
+  .describe('day-format', 'Use hh:mm:ss day date format')
+  .alias('d', 'day-format')
+  .boolean('d')
+  .describe('fetch-interval', 'fetch-rate of kinesis records in ms')
+  .alias('i', 'fetch-interval')
+  .number('1')
   .number(['refresh-rate', 'batch-size'])
-  .help('h').alias('h', 'help')
-  .argv;
+  .help('h')
+  .alias('h', 'help').argv;
 
 const processors = require('./lib/processors');
 const cliView = require('./lib/cli-view');
 
-const kinesis = Promise.promisifyAll(new AWS.Kinesis({
-  apiVersion: '2013-12-02',
-  endpoint: argv.endpoint,
-  credentialProvider: customChain,
-  region: process.env.AWS_REGION || 'eu-west-1'
-}), {suffix: 'P'});
+const kinesis = Promise.promisifyAll(
+  new AWS.Kinesis({
+    apiVersion: '2013-12-02',
+    endpoint: argv.endpoint,
+    credentialProvider: customChain,
+    region: process.env.AWS_REGION || 'eu-west-1'
+  }),
+  {suffix: 'P'}
+);
 
 const settings = {}; // maybe rename global
 settings.state = {count: 0, shardCount: []}; // TODO: maybe encapsulate in the kinesis-listener
@@ -67,31 +90,38 @@ if (argv.retro) {
 }
 
 const main = () => {
-  const streamNameP = settings.config.kinesisStream ? Promise.resolve(settings.config.kinesisStream) : selectStream()
-  return streamNameP
-    .then(kinesisStream => {
-      settings.config.kinesisStream = kinesisStream;
-      cliView.setUpKeyboardInteraction(settings.config, settings.state);
+  const streamNameP = settings.config.kinesisStream
+    ? Promise.resolve(settings.config.kinesisStream)
+    : selectStream();
+  return streamNameP.then(kinesisStream => {
+    settings.config.kinesisStream = kinesisStream;
+    cliView.setUpKeyboardInteraction(settings.config, settings.state);
 
-      return resilientListener(settings.config)
-        .catch(err => err.name === "ResourceNotFoundException", err => {
+    return resilientListener(settings.config)
+      .catch(
+        err => err.name === 'ResourceNotFoundException',
+        err => {
           console.log(err.message);
           process.exit(2);
-        })
-        .catch(err => _.includes(['UnknownEndpoint', 'NetworkingError'], err.name), err => {
+        }
+      )
+      .catch(
+        err => _.includes(err.name, ['UnknownEndpoint', 'NetworkingError']),
+        err => {
           if (argv.endpoint)
             console.log(c.red(`Provided Endpoint ${c.bold(argv.endpoint)} is not accessible`));
           else
             console.log(c.red('Unaccessible AWS region endpoint, check your internet connection'));
           console.log(err.message);
           process.exit(3);
-        })
-        .catch(err => {
-          console.log(c.red('Error Occured forcing us to shut down the program:'));
-          console.log(err.message);
-          process.exit(1);
-        });
-    })
+        }
+      )
+      .catch(err => {
+        console.log(c.red('Error Occured forcing us to shut down the program:'));
+        console.log(err.message);
+        process.exit(1);
+      });
+  });
 };
 
 module.exports = main;
