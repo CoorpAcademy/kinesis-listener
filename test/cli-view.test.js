@@ -18,7 +18,6 @@ test.todo('checkpoint with some new record');
 
 test('view with no record', t => {
   const dashboardView = stripAnsi(view(BASIC_CONFIG, EMPTY_STATE));
-  console.log(dashboardView)
   t.regex(dashboardView, /Listening test-stream kinesis/);
   t.regex(dashboardView, /- stream with /);
   t.regex(dashboardView, /- received so far 0 records/);
