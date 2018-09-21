@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
+/* eslint-disable no-console, unicorn/process-exit */
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
 const yargs = require('yargs');
 const _ = require('lodash/fp');
+const logUpdate = require('log-update');
 const {parseRetroDate} = require('./lib/utils');
 const {customChain} = require('./lib/aws-credentials-utils');
 
@@ -95,7 +96,10 @@ const main = () => {
     : selectStream();
   return streamNameP.then(kinesisStream => {
     settings.config.kinesisStream = kinesisStream;
-    cliView.setUpKeyboardInteraction(settings.config, settings.state);
+    cliView.setUpKeyboardInteraction(logUpdate, () => process.exit(0))(
+      settings.config,
+      settings.state
+    );
 
     return resilientListener(settings.config)
       .catch(
