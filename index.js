@@ -1,13 +1,15 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
+const yargs = require('yargs');
 const _ = require('lodash');
 const {parseRetroDate} = require('./lib/utils');
 const {customChain} = require('./lib/aws-credentials-utils');
 
-const argv = require('yargs')
+const argv = yargs
   .usage('Usage: $0 [kinesis-stream-name]')
   .example('$0 log-stream --filename dump.log')
   .describe('endpoint', 'Specify an alternative endpoint for the kinesis sdk')

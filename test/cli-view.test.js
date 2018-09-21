@@ -11,5 +11,6 @@ test.todo('check checkpoint with no new record');
 test.todo('checkpoint with some new record');
 
 test.todo('view with no record');
+view; // TODO do not please linter, write test!
 test.todo('view with some record');
 test.todo('view with file streaming');

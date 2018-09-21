@@ -11,7 +11,7 @@ test('simple retro date', t => {
   t.deepEqual(noms(douzeHoursAgo), noms(computedRetro));
 });
 
-test('simple retro date', t => {
+test('complex retro date', t => {
   const taleur = moment()
     .subtract(2, 'hours')
     .subtract(14, 'minutes')

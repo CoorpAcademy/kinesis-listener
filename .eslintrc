@@ -19,6 +19,8 @@
     "@coorpacademy/coorpacademy"
   ],
   "rules": {
-    "strict": "off"
+    "strict": "off",
+    "promise/no-nesting": "warn",
+    "promise/valid-params": "warn"
   }
 }
