@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const Promise = require('bluebird');
 const c = require('chalk');
 const yargs = require('yargs');
-const _ = require('lodash');
+const _ = require('lodash/fp');
 const {parseRetroDate} = require('./lib/utils');
 const {customChain} = require('./lib/aws-credentials-utils');
 
@@ -106,7 +106,7 @@ const main = () => {
         }
       )
       .catch(
-        err => _.includes(['UnknownEndpoint', 'NetworkingError'], err.name),
+        err => _.includes(err.name, ['UnknownEndpoint', 'NetworkingError']),
         err => {
           if (argv.endpoint)
             console.log(c.red(`Provided Endpoint ${c.bold(argv.endpoint)} is not accessible`));
