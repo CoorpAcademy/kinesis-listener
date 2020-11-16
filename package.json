@@ -3,6 +3,9 @@
   "version": "0.13.0",
   "description": "Cli to listen to a kinesis stream",
   "main": "index.js",
+  "engines": {
+    "node": ">=10.20"
+  },
   "files": [
     "src"
   ],
