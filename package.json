@@ -22,7 +22,7 @@
     "aws"
   ],
   "author": "Adrien Becchis",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.100.0",
     "bluebird": "^3.5.0",

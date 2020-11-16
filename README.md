@@ -4,12 +4,14 @@ kinesis-listener
 [![Build Status](https://travis-ci.com/CoorpAcademy/kinesis-listener.svg?branch=master)](https://travis-ci.com/CoorpAcademy/kinesis-listener)
 [![codecov](https://codecov.io/gh/CoorpAcademy/kinesis-listener/branch/master/graph/badge.svg)](https://codecov.io/gh/CoorpAcademy/kinesis-listener)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 `kinesis-listener` is a cli to listen to kinesis stream and have
 an idea of the messages that transit.
 
 ## Installation
 
-Install it globaly with npm 
+Install it globaly with npm
 
 ```sh
 npm install -g @coorpacademy/kinesis-listener
