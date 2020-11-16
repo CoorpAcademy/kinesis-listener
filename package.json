@@ -3,13 +3,16 @@
   "version": "0.13.0",
   "description": "Cli to listen to a kinesis stream",
   "main": "index.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "ava",
     "cover": "nyc npm run test",
     "publish-coverage": "nyc report --reporter=lcov > coverage.lcov && codecov",
-    "lint": "eslint lib/ test/ *.js *.json --ext .js,.json"
+    "lint": "eslint src/ test/ *.js *.json --ext .js,.json"
   },
-  "preferGlobal": "true",
+  "preferGlobal": true,
   "bin": {
     "kinesis-listener": "./index.js"
   },

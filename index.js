@@ -6,9 +6,9 @@ const Promise = require('bluebird');
 const c = require('chalk');
 const _ = require('lodash/fp');
 const logUpdate = require('log-update');
-const {getSettings, getOptions} = require('./lib/settings');
-const {customChain} = require('./lib/aws-credentials-utils');
-const cliView = require('./lib/cli-view');
+const {getSettings, getOptions} = require('./src/settings');
+const {customChain} = require('./src/aws-credentials-utils');
+const cliView = require('./src/cli-view');
 
 const argv = getOptions();
 const kinesis = Promise.promisifyAll(
@@ -23,8 +23,8 @@ const kinesis = Promise.promisifyAll(
 
 const settings = getSettings(argv, kinesis);
 
-const {resilientListener} = require('./lib/kinesis-listener')(kinesis, settings);
-const {selectStream} = require('./lib/kinesis-selector')(kinesis);
+const {resilientListener} = require('./src/kinesis-listener')(kinesis, settings);
+const {selectStream} = require('./src/kinesis-selector')(kinesis);
 
 const main = () => {
   const streamNameP = settings.config.kinesisStream
