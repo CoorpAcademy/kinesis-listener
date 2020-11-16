@@ -2,22 +2,23 @@ const inquirer = require('inquirer');
 
 const prompt = inquirer.createPromptModule();
 
-const promptForStream = listOfStream => {
-  const streamPrompt = prompt({
+const promptForStream = async listOfStream => {
+  const streamPrompt = await prompt({
     type: 'list',
     name: 'stream',
     choices: listOfStream,
     message: 'Select which stream you want to listen:'
   });
-  return streamPrompt.then(res => res.stream);
+  return streamPrompt.stream;
 };
 
 module.exports = kinesis => {
-  const getListOfStream = () => {
-    return kinesis.listStreamsP().then(sa => sa.StreamNames);
+  const getListOfStream = async () => {
+    const {StreamNames} = await kinesis.listStreams().promise();
+    return StreamNames;
   };
 
-  const selectStream = () => getListOfStream().then(streams => promptForStream(streams));
+  const selectStream = async () => promptForStream(await getListOfStream());
 
   return {getListOfStream, promptForStream, selectStream};
 };

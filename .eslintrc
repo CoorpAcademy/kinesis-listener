@@ -20,6 +20,7 @@
   ],
   "rules": {
     "strict": "off",
-    "promise/no-nesting": "off"
+    "promise/no-nesting": "off",
+    "promise/no-native": "off"
   }
 }

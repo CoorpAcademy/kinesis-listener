@@ -28,9 +28,9 @@
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.792.0",
-    "bluebird": "^3.7.2",
     "chalk": "^4.1.0",
     "cli-spinners": "^2.5.0",
+    "delay": "^4.4.0",
     "indent-string": "^4.0.0",
     "inquirer": "^7.3.3",
     "lodash": "^4.17.20",
@@ -38,6 +38,7 @@
     "log-update": "^4.0.0",
     "moment": "^2.29.1",
     "ora": "^5.1.0",
+    "p-map": "^4.0.0",
     "wrap-ansi": "^7.0.0",
     "yargs": "^16.1.1"
   },

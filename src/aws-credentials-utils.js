@@ -8,4 +8,4 @@ customChain.providers.push(() => {
   return new AWS.Credentials('undefined', 'undefined');
 });
 
-module.exports.customChain = customChain;
+module.exports = {customChain};

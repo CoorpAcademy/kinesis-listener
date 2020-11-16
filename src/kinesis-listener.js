@@ -1,6 +1,7 @@
 const c = require('chalk');
 const _ = require('lodash/fp');
-const Promise = require('bluebird');
+const pMap = require('p-map');
+const delay = require('delay');
 
 const logUpdate = require('log-update');
 const logSymbols = require('log-symbols');
@@ -10,68 +11,66 @@ const cliView = require('./cli-view');
 module.exports = (kinesis, settings) => {
   const {state, config} = settings;
 
-  const readIterator = recordProcessors => ({ShardId, ShardIterator}) => {
-    return kinesis.getRecordsP({ShardIterator, Limit: config.batchSize}).then(data => {
-      const iterator = data.NextShardIterator;
-      const context = {
-        ShardId,
-        ShardIterator,
-        nRecords: data.Records.length
-      };
-      // TODO: see MillisBehind Latest to determine batchsize?
-      const records = _.map(
-        record =>
-          Object.assign(record, {Data: Buffer.from(record.Data, 'base64').toString('utf-8')}),
-        data.Records
-      );
-      _.forEach(
-        recordProcessor => _.map(recordProcessor(state, context), records),
-        recordProcessors
-      );
-      // maybe: later async record processor
-      return {ShardId, ShardIterator: iterator};
-    });
+  const readIterator = recordProcessors => async ({ShardId, ShardIterator}) => {
+    const data = await kinesis.getRecords({ShardIterator, Limit: config.batchSize}).promise();
+    const iterator = data.NextShardIterator;
+    const context = {
+      ShardId,
+      ShardIterator,
+      nRecords: data.Records.length
+    };
+    // TODO: see MillisBehind Latest to determine batchsize?
+    const records = _.map(
+      record => Object.assign(record, {Data: Buffer.from(record.Data, 'base64').toString('utf-8')}),
+      data.Records
+    );
+    _.forEach(recordProcessor => _.map(recordProcessor(state, context), records), recordProcessors);
+    // maybe: later async record processor
+    return {ShardId, ShardIterator: iterator};
   };
 
-  const getStreamShards = kinesisStream =>
-    kinesis.describeStreamP({StreamName: kinesisStream}).then(streamConf => {
-      const shardsIds = _.map('ShardId', streamConf.StreamDescription.Shards);
-      config.shardsIds = shardsIds;
-      return shardsIds;
+  const getStreamShards = async kinesisStream => {
+    const streamConfig = await kinesis.describeStream({StreamName: kinesisStream}).promise();
+    const shardsIds = _.map('ShardId', streamConfig.StreamDescription.Shards);
+    config.shardsIds = shardsIds;
+    return shardsIds;
+  };
+
+  const launchListener = async conf => {
+    const shards = await getStreamShards(config.kinesisStream);
+    const shardIterators = await pMap(shards, async shardId => {
+      const {ShardIterator} = await kinesis
+        .getShardIterator({
+          StreamName: conf.kinesisStream,
+          ShardId: shardId,
+          ShardIteratorType: conf.ShardIteratorType,
+          Timestamp: conf.Timestamp
+        })
+        .promise();
+      return {ShardId: shardId, ShardIterator};
     });
 
-  const launchListener = conf =>
-    getStreamShards(config.kinesisStream)
-      .map(shardId =>
-        kinesis
-          .getShardIteratorP({
-            StreamName: conf.kinesisStream,
-            ShardId: shardId,
-            ShardIteratorType: conf.ShardIteratorType,
-            Timestamp: conf.Timestamp
-          })
-          .then(si => ({ShardId: shardId, ShardIterator: si.ShardIterator}))
-      )
-      .then(shardIterators => {
-        const kinesisIterator = readIterator(conf.processorsList);
+    const kinesisIterator = readIterator(conf.processorsList);
 
-        const readLoop = initialIterators => {
-          return Promise.all([
-            Promise.map(initialIterators, kinesisIterator),
-            Promise.delay(conf.fetchInterval)
-          ])
-            .then(([iterators, noop]) => iterators)
-            .then(readLoop);
-        };
-        const printLoop = () => {
-          logUpdate(cliView.view(config, state));
-          return Promise.delay(config.updateRate).then(printLoop);
-        };
-        return Promise.all([readLoop(shardIterators), printLoop()]);
-      });
+    const readLoop = async initialIterators => {
+      const [iterators] = await Promise.all([
+        pMap(initialIterators, kinesisIterator),
+        delay(conf.fetchInterval)
+      ]);
+      return readLoop(iterators);
+    };
+    const printLoop = async () => {
+      logUpdate(cliView.view(config, state));
+      await delay(config.updateRate);
+      return printLoop();
+    };
+    return Promise.all([readLoop(shardIterators), printLoop()]);
+  };
 
-  const resilientListener = conf =>
-    launchListener(conf).catch(err => {
+  const resilientListener = async conf => {
+    try {
+      await launchListener(conf);
+    } catch (err) {
       if (
         !_.includes(err.code, [
           'ProvisionedThroughputExceededException',
@@ -84,7 +83,8 @@ module.exports = (kinesis, settings) => {
 ${logSymbols.info} ${c.blue.bold('Relaunching listener')}`);
       logUpdate.done();
       return resilientListener(conf);
-    });
+    }
+  };
 
   return {
     readIterator,
