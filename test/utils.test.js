@@ -12,10 +12,7 @@ test('simple retro date', t => {
 });
 
 test('complex retro date', t => {
-  const taleur = moment()
-    .subtract(2, 'hours')
-    .subtract(14, 'minutes')
-    .subtract(3, 'seconds');
+  const taleur = moment().subtract(2, 'hours').subtract(14, 'minutes').subtract(3, 'seconds');
   const computedRetro = moment(parseRetroDate('2h14m3s'));
   t.deepEqual(noms(taleur), noms(computedRetro));
 });

@@ -12,7 +12,7 @@ const speedSpinner = cliSpinners.arrow3;
 
 const timeBasedSpin = (spinner, speedFactor = 1) =>
   spinner.frames[
-    Math.floor(new Date().getTime() / spinner.interval * speedFactor) % spinner.frames.length
+    Math.floor((new Date().getTime() / spinner.interval) * speedFactor) % spinner.frames.length
   ];
 
 const view = subviews => (config, state) => {
@@ -62,10 +62,10 @@ const lastReceiveRecord = (config, state) => {
     moment(state.timestampLastReceived).format(config.dateFormat)
   )}) :
 ${indentString(
-    util.inspect(_.omit(['content'], state.lastJsonRecord), {depth: null, colors: true}),
-    // TODO make _.omit a filter function!! (in config)
-    2
-  )}`;
+  util.inspect(_.omit(['content'], state.lastJsonRecord), {depth: null, colors: true}),
+  // TODO make _.omit a filter function!! (in config)
+  2
+)}`;
 };
 
 const detailedViews = [
@@ -84,11 +84,11 @@ const checkpoint = (config, state) => {
     !state.lastJsonRecord
       ? `No record received so far`
       : !deltaCount
-        ? 'No new record since last checkpoint'
-        : `${deltaCount} new records, last being:\n${util.inspect(
-            _.omit(['content'], state.lastJsonRecord),
-            {depth: null, colors: true}
-          )}`
+      ? 'No new record since last checkpoint'
+      : `${deltaCount} new records, last being:\n${util.inspect(
+          _.omit(['content'], state.lastJsonRecord),
+          {depth: null, colors: true}
+        )}`
   }`;
 };
 

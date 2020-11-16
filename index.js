@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-console, unicorn/process-exit */
+/* eslint-disable no-console */
 
 const AWS = require('aws-sdk');
 const Promise = require('bluebird');
