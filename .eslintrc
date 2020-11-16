@@ -20,7 +20,6 @@
   ],
   "rules": {
     "strict": "off",
-    "promise/no-nesting": "warn",
-    "promise/valid-params": "warn"
+    "promise/no-nesting": "off"
   }
 }

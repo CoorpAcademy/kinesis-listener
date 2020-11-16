@@ -3,6 +3,7 @@ const _ = require('lodash/fp');
 const Promise = require('bluebird');
 
 const logUpdate = require('log-update');
+const logSymbols = require('log-symbols');
 
 const cliView = require('./cli-view');
 
@@ -70,22 +71,20 @@ module.exports = (kinesis, settings) => {
       });
 
   const resilientListener = conf =>
-    launchListener(conf).catch(
-      err =>
-        _.includes(err.code, [
+    launchListener(conf).catch(err => {
+      if (
+        !_.includes(err.code, [
           'ProvisionedThroughputExceededException',
           'ExpiredIteratorException'
-        ]),
-      err => {
-        logUpdate.clear();
-        /* eslint-disable no-console */
-        console.log(c.red.bold('Error Occured'));
-        console.log(err.message);
-        console.log(c.blue.bold('Relaunching listener'));
-        return resilientListener(conf);
-        /* eslint-enable no-console */
-      }
-    );
+        ])
+      )
+        throw err;
+      logUpdate(`${logSymbols.error} ${c.red.bold('Error Occured')}
+  ${err.message}
+${logSymbols.info} ${c.blue.bold('Relaunching listener')}`);
+      logUpdate.done();
+      return resilientListener(conf);
+    });
 
   return {
     readIterator,
