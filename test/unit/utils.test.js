@@ -1,7 +1,7 @@
 const test = require('ava');
 const moment = require('moment');
 
-const {parseRetroDate} = require('../src/utils');
+const {parseRetroDate} = require('../../src/utils');
 
 const noms = date => date.format('MMMM Do YYYY, h:mm:ss');
 

@@ -1,6 +1,6 @@
 const test = require('ava');
 
-const {counterProcessor} = require('../src/processors');
+const {counterProcessor} = require('../../src/processors');
 
 const emptyRecord = {};
 const context = {ShardId: 'sha1'};

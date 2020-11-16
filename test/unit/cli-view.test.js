@@ -1,7 +1,7 @@
 const test = require('ava');
 const stripAnsi = require('strip-ansi');
 
-const {checkpoint, view} = require('../src/cli-view');
+const {checkpoint, view} = require('../../src/cli-view');
 
 const BASIC_CONFIG = {
   kinesisStream: 'test-stream'
